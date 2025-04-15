@@ -5,6 +5,21 @@ import postgres from 'postgres';
 import { eq, and, isNull } from 'drizzle-orm';
 import Sentry from "./_sentry.js";
 
+/**
+ * Safely parses JSON data if it's a string, returns as-is if already an object
+ */
+function safeParseJSON(data) {
+  if (typeof data === 'object' && data !== null) return data;
+  
+  try {
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('JSON parsing error:', error, 'Data:', data);
+    Sentry.captureException(error);
+    throw new Error(`Invalid JSON: ${error.message}`);
+  }
+}
+
 export default async function handler(req, res) {
   console.log("Folders API called:", req.method);
   
@@ -29,7 +44,10 @@ export default async function handler(req, res) {
       console.log(`Found ${result.length} folders`);
       res.status(200).json(result);
     } else if (req.method === 'POST') {
-      const { name, parentId } = JSON.parse(req.body);
+      // Use the safe parsing function instead of direct JSON.parse
+      const parsedBody = safeParseJSON(req.body);
+      const { name, parentId } = parsedBody;
+      
       console.log("Creating folder:", name, "with parentId:", parentId);
 
       const result = await db.insert(folders)
@@ -43,7 +61,10 @@ export default async function handler(req, res) {
       console.log("Created folder:", result[0]);
       res.status(201).json(result[0]);
     } else if (req.method === 'DELETE') {
-      const { id } = JSON.parse(req.body);
+      // Use the safe parsing function instead of direct JSON.parse
+      const parsedBody = safeParseJSON(req.body);
+      const { id } = parsedBody;
+      
       console.log("Deleting folder with ID:", id);
 
       await db.delete(folders)
