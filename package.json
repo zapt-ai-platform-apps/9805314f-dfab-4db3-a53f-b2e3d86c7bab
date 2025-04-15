@@ -1,7 +1,7 @@
 {
-    "name": "reactjs-vite-tailwind-vercel",
+    "name": "cloudmarsh",
     "version": "1.0.0",
-    "description": "ReactJS app with Vite, Tailwind",
+    "description": "CLOUDMARSH - Cloud infrastructure management application",
     "type": "module",
     "scripts": {
         "dev": "vite",
